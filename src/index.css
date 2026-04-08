@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 97%;
+    --foreground: 220 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 220 20% 10%;
+
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 220 14% 94%;
+    --accent-foreground: 220 20% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 221 83% 53%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 10% 30%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 221 83% 96%;
+    --sidebar-accent-foreground: 221 83% 40%;
+    --sidebar-border: 220 13% 92%;
+    --sidebar-ring: 221 83% 53%;
+
+    --chat-user: 221 83% 53%;
+    --chat-user-foreground: 0 0% 100%;
+    --chat-ai: 220 14% 94%;
+    --chat-ai-foreground: 220 20% 10%;
+  }
+
+  .dark {
+    --background: 222 20% 8%;
+    --foreground: 210 20% 92%;
+
+    --card: 222 20% 12%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 222 20% 12%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 15% 18%;
+    --secondary-foreground: 210 20% 92%;
+
+    --muted: 222 15% 18%;
+    --muted-foreground: 215 15% 60%;
+
+    --accent: 222 15% 18%;
+    --accent-foreground: 210 20% 92%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 20% 92%;
+
+    --border: 222 15% 20%;
+    --input: 222 15% 20%;
+    --ring: 221 83% 53%;
+
+    --sidebar-background: 222 20% 10%;
+    --sidebar-foreground: 210 15% 70%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 20% 15%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 222 15% 18%;
+    --sidebar-ring: 221 83% 53%;
+
+    --chat-user: 221 83% 53%;
+    --chat-user-foreground: 0 0% 100%;
+    --chat-ai: 222 15% 18%;
+    --chat-ai-foreground: 210 20% 92%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+}
