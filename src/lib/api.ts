@@ -1,4 +1,5 @@
 export type AppMode = "translator" | "assistant";
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 export interface Message {
   id: string;
@@ -21,22 +22,55 @@ export interface Chat {
 
 export const genId = () => Math.random().toString(36).slice(2, 10);
 
-export const sendMessageAPI = async (text: string, mode: AppMode): Promise<{ detected?: string; response: string }> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (mode === "translator") {
-        resolve({
-          detected: "English",
-          response: "এইটো এটা demo অনুবাদ",
-        });
-      } else {
-        resolve({
-          response: "এইটো এটা AI সহায়ক উত্তৰ (demo)",
-        });
-      }
-    }, 800);
-  });
+export const sendMessageAPI = async (
+  text: string,
+  mode: AppMode
+): Promise<{ detected?: string; response: string }> => {
+  try {
+    let endpoint = "";
+    let body: any = {};
+
+    if (mode === "translator") {
+      endpoint = "/translate";
+      body = {
+        text,
+        source_lang: "eng_Latn",
+        target_lang: "asm_Beng",
+      };
+    } else {
+      endpoint = "/aimode";
+      body = { text };
+    }
+
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error("Server error");
+    }
+
+    const data = await response.json();
+
+    return {
+      response: data?.message || "❌ No response from server.",
+      detected: mode === "translator" ? "eng_Latn" : undefined,
+    };
+
+  } catch (error) {
+    console.error("API Error:", error);
+
+    return {
+      response: "⚠️ Error: Unable to reach server.",
+    };
+  }
 };
+
+
 
 export const speechToTextAPI = async (): Promise<string> => {
   return new Promise((resolve) => {

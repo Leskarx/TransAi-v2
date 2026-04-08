@@ -52,12 +52,8 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
           isUser ? "bg-chat-user text-chat-user-foreground" : "bg-chat-ai text-chat-ai-foreground"
         }`}
       >
-        {message.detected && (
-          <span className="text-[10px] uppercase tracking-wider opacity-60 block mb-1">
-            Detected: {message.detected}
-          </span>
-        )}
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+       
+        <p className="text-lg leading-relaxed whitespace-pre-wrap">{message.text}</p>
       </div>
     </div>
   );
