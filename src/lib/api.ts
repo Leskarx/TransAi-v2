@@ -72,20 +72,80 @@ export const sendMessageAPI = async (
 
 
 
-export const speechToTextAPI = async (): Promise<string> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve("এইটো এটা demo voice input");
-    }, 500);
+export const speechToTextAPI = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const SpeechRecognition =
+      (window as any).webkitSpeechRecognition ||
+      (window as any).SpeechRecognition;
+
+    if (!SpeechRecognition) {
+      reject("Speech recognition not supported");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN"; // or "as-IN"
+    recognition.interimResults = false;
+    recognition.continuous = false; // ✅ IMPORTANT
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      recognition.stop(); // ✅ STOP mic
+      resolve(transcript);
+    };
+
+    recognition.onerror = (err: any) => {
+      recognition.stop(); // ✅ STOP on error
+      reject(err);
+    };
+
+    recognition.onend = () => {
+      // optional safety
+      recognition.stop();
+    };
+
+    recognition.start();
   });
 };
 
-export const uploadFileAPI = async (file: File): Promise<{ status: string; fileName: string }> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ status: "uploaded", fileName: file.name });
-    }, 800);
-  });
+export const uploadFileAPI = async (
+  file: File
+): Promise<{ fileName: string; fileUrl: string }> => {
+  try {
+    const formData = new FormData();
+    formData.append("pdf", file); // must match multer
+
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Upload failed");
+    }
+
+    // 🔥 Get filename from headers (optional but good)
+    let fileName = "translated.pdf";
+    const disposition = res.headers.get("Content-Disposition");
+
+    if (disposition) {
+      const match = disposition.match(/filename="?(.+)"?/);
+      if (match) fileName = match[1];
+    }
+
+    // 🔥 Convert response → blob
+    const blob = await res.blob();
+
+    // 🔥 Create temporary URL
+    const fileUrl = URL.createObjectURL(blob);
+
+    return { fileName, fileUrl };
+
+  } catch (error) {
+    console.error("Upload API error:", error);
+    throw error;
+  }
 };
 
 export const processFileAPI = async (file: File): Promise<{ fileName: string; fileUrl: string }> => {

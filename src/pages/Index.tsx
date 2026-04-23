@@ -17,6 +17,7 @@ const Index = () => {
   const [typing, setTyping] = useState(false);
   const [micLoading, setMicLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [text, setText] = useState("");
 
   const activeChat = chats.find((c) => c.id === activeChatId) || null;
 
@@ -63,36 +64,75 @@ const Index = () => {
   };
 
   const handleMic = async () => {
-    setMicLoading(true);
-    const text = await speechToTextAPI();
-    setMicLoading(false);
-    if (text) handleSendText(text);
+    if (micLoading) return; // ✅ prevent double start
+  
+    try {
+      setMicLoading(true);
+      const result = await speechToTextAPI();
+      setMicLoading(false);
+  
+      if (result) {
+        setText((prev) => prev ? prev + " " + result : result);
+      }
+    } catch (err) {
+      console.error(err);
+      setMicLoading(false);
+    }
   };
 
   const handleFileUpload = async (file: File) => {
-    const fileMsg: Message = { id: genId(), type: "file", sender: "user", fileName: file.name, status: "uploading" };
-    const chatId = ensureChat(fileMsg);
-
-    // Simulate upload
-    await uploadFileAPI(file);
-    updateChat(chatId, (c) => ({
-      ...c,
-      messages: c.messages.map((m) => m.id === fileMsg.id ? { ...m, status: "processing" as const } : m),
-    }));
-
-    // Simulate processing
-    const result = await processFileAPI(file);
-    updateChat(chatId, (c) => ({
-      ...c,
-      messages: c.messages.map((m) => m.id === fileMsg.id ? { ...m, status: "done" as const } : m),
-    }));
-
-    // AI response with processed file
-    const aiFile: Message = {
-      id: genId(), type: "file", sender: "ai",
-      fileName: result.fileName, fileUrl: result.fileUrl, status: "done",
+    const fileMsg: Message = {
+      id: genId(),
+      type: "file",
+      sender: "user",
+      fileName: file.name,
+      status: "uploading",
     };
-    updateChat(chatId, (c) => ({ ...c, messages: [...c.messages, aiFile] }));
+  
+    const chatId = ensureChat(fileMsg);
+  
+    try {
+      // 🔥 Call backend
+      const result = await uploadFileAPI(file);
+  
+      // update status → done
+      updateChat(chatId, (c) => ({
+        ...c,
+        messages: c.messages.map((m) =>
+          m.id === fileMsg.id
+            ? { ...m, status: "done" as const }
+            : m
+        ),
+      }));
+  
+      // 🔥 Add AI response (translated PDF)
+      const aiFile: Message = {
+        id: genId(),
+        type: "file",
+        sender: "ai",
+        fileName: result.fileName,
+        fileUrl: result.fileUrl,
+        status: "done",
+      };
+  
+      updateChat(chatId, (c) => ({
+        ...c,
+        messages: [...c.messages, aiFile],
+      }));
+  
+    } catch (err) {
+      console.error(err);
+  
+      // optional: mark failed
+      updateChat(chatId, (c) => ({
+        ...c,
+        messages: c.messages.map((m) =>
+          m.id === fileMsg.id
+            ? { ...m, status: "done" as const }
+            : m
+        ),
+      }));
+    }
   };
 
   const handleNewChat = () => {
@@ -125,12 +165,14 @@ const Index = () => {
         />
         <ChatWindow messages={activeChat?.messages || []} typing={typing} mode={mode} />
         <InputBar
-          onSendText={handleSendText}
-          onMicClick={handleMic}
-          onFileUpload={handleFileUpload}
-          disabled={typing}
-          micLoading={micLoading}
-        />
+  text={text}
+  setText={setText}
+  onSendText={handleSendText}
+  onMicClick={handleMic}
+  onFileUpload={handleFileUpload}
+  disabled={typing}
+  micLoading={micLoading}
+/>
       </div>
     </div>
   );
